@@ -122,7 +122,7 @@ module Saddler
                           builder.use Octokit::Middleware::FollowRedirects
                           builder.use Octokit::Response::RaiseError
                           builder.use Octokit::Response::FeedParser
-                          builder.response :logger do |logger|
+                          builder.response :logger, nil, { headers: true, bodies: true } do |logger|
                             logger.filter(/(Authorization: "(token|Bearer) )(\w+)/, '\1[REMOVED]')
                           end
                           builder.adapter Faraday.default_adapter
