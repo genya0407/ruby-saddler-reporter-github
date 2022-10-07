@@ -4,8 +4,10 @@ module Saddler
       # GitHub client wrapper
       class Client
         # @param repo [Repository] git repository
-        def initialize(repo)
+        # @param debug [Boolean] debug mode
+        def initialize(repo, debug: false)
           @repo = repo
+          @debug = debug
         end
 
         # @param sha [String] target commit sha
@@ -113,7 +115,22 @@ module Saddler
 
         # @return [Octokit::Client]
         def client
-          @client ||= Octokit::Client.new(access_token: access_token)
+          @client ||= if @debug
+                        # see: https://github.com/octokit/octokit.rb/tree/v5.6.1#debugging
+                        middleware = Faraday::RackBuilder.new do |builder|
+                          builder.use Faraday::Retry::Middleware, exceptions: [Octokit::ServerError] # or Faraday::Request::Retry for Faraday < 2.0
+                          builder.use Octokit::Middleware::FollowRedirects
+                          builder.use Octokit::Response::RaiseError
+                          builder.use Octokit::Response::FeedParser
+                          builder.response :logger do |logger|
+                            logger.filter(/(Authorization: "(token|Bearer) )(\w+)/, '\1[REMOVED]')
+                          end
+                          builder.adapter Faraday.default_adapter
+                        end
+                        Octokit::Client.new(access_token: access_token, middleware: middleware)
+                      else
+                        Octokit::Client.new(access_token: access_token)
+                      end
         end
 
         # @return [String, nil] github access token

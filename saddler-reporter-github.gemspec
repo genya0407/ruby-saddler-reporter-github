@@ -36,6 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'saddler-reporter-support', '>= 1.0'
   spec.add_runtime_dependency 'saddler-reporter-support-git', '>= 1.0'
   spec.add_runtime_dependency 'env_pull_request', '>= 1.0'
+  spec.add_runtime_dependency 'faraday-retry', '>= 1.0'
 
   spec.add_development_dependency 'bundler', '>= 0'
   spec.add_development_dependency 'rake', '>= 0'
